@@ -1,16 +1,19 @@
+import { Observable } from "rxjs";
 import HttpsService from "./HttpService";
 import HttpService from "./HttpService";
 
 export default class AuthService {
-    static async login(email, password) {
-        const url = HttpsService.host + '/login';
+    static uri = `${HttpsService.host}/auth`;
+
+    static login(email, password): Observable<any> {
+        const url = AuthService.uri + '/login';
 
         return HttpService.post(url, { email, password });
     }
 
-    static async register(email, password) {
-        const url = HttpsService.host + '/register';
+    static register(email, password): Observable<any> {
+        const url = AuthService.uri + '/register';
 
-        HttpService.post(url, { email, password })
+        return HttpService.post(url, { email, password });
     }
 }

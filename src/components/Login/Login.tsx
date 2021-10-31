@@ -1,10 +1,20 @@
 import React, { Component } from 'react';
+import AuthService from '../../core/AuthService';
+import AuthForm from '../shared/AuthForm/AuthForm';
+
 import './Login.scss';
 
 export default class Login extends Component {
+    login = (email: string, password: string) => {
+        AuthService.login(email, password);
+    }
+
     render() {
         return (
-            <h1 className="login">Login</h1>
+            <div className="login">
+                <h1>Login</h1>
+                <AuthForm onChange={this.login}></AuthForm>
+            </div>
         );
     }
 };
