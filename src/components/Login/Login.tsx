@@ -13,7 +13,7 @@ export default class Login extends Component {
         return (
             <div className="login">
                 <h1>Login</h1>
-                <AuthForm onChange={this.login}></AuthForm>
+                <AuthForm isRequesting={false} onChange={this.login}></AuthForm>
             </div>
         );
     }

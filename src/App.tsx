@@ -1,38 +1,81 @@
 import React, { Component } from 'react';
-import { Switch, Route, Link } from 'react-router-dom';
+import { Switch, Route, Link, withRouter, RouteComponentProps } from 'react-router-dom';
 import { GuardedRoute, GuardProvider } from 'react-router-guards';
+import { filter, Subject, takeUntil } from 'rxjs';
 
 import Login from './components/Login/Login.lazy';
 import Register from './components/Register/Register.lazy';
 import Home from './components/Home/Home.lazy';
 import Profile from './components/Profile/Profile.lazy';
 
+import AuthService from './core/AuthService';
+
 import './App.scss';
 
-const requireLogin = (to, from, next) => {
-    next.redirect('/login');
-};
+interface IAppState {
+	isLogged: boolean,
+}
 
-export default class App extends Component {
+class App extends Component<RouteComponentProps, IAppState> {
+	destroy$: Subject<void> = new Subject();
+
+	constructor(props) {
+		super(props);
+		this.state = {
+			isLogged: null,
+		};
+	}
+
+	appGuard = (to, from, next) => {
+		console.log('guard...');
+
+		if (['/login', '/register'].includes(to.match.path)) {
+			if (this.state.isLogged) {
+				return next.redirect('/');
+			}
+
+			if (!this.state.isLogged) {
+				return next();
+			}
+		}
+
+		if (!this.state.isLogged) {
+			return next.redirect(from.match.path);
+		}
+
+		return next();
+	};
+
+	componentDidMount() {
+		AuthService.isLogged$.pipe(
+			takeUntil(this.destroy$),
+		).subscribe((value: boolean) => {
+			this.setState({ isLogged: value });
+			this.props.history.push('/');
+		});
+	}
+
+	componentWillUnmount() {
+		this.destroy$.next();
+	}
+
     render() {
         return (
             <div className="app">
-                <GuardProvider guards={[requireLogin]} loading={'Loading...'} error={'Not Found'}>
-                    <Link to="/register">To Register</Link>
-                    <br/>
-                    <Link to="/login">To Login</Link>
-                    <br/>
-                    <Link to="/profile">To Profile</Link>
+                <GuardProvider guards={[this.appGuard]} loading={'Loading...'} error={'Not Found'}>
+                    {!this.state.isLogged && <Link to="/register">To Register<br/></Link>}
+                    {!this.state.isLogged && (<Link to="/login">To Login<br/></Link>)}
+                    {this.state.isLogged && <Link to="/profile">To Profile</Link>}
                     <Switch>
                         <GuardedRoute path="/profile">
                             <Profile />
                         </GuardedRoute >
-                        <Route path="/login">
+                        <GuardedRoute path="/login">
                             <Login />
-                        </Route>
-                        <Route path="/register">
+                        </GuardedRoute>
+                        <GuardedRoute path="/register">
                             <Register />
-                        </Route>
+                        </GuardedRoute>
                         <Route path="/">
                             <Home />
                         </Route>
@@ -42,3 +85,5 @@ export default class App extends Component {
         );
     }
 }
+
+export default withRouter(App);

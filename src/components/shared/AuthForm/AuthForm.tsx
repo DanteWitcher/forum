@@ -1,10 +1,11 @@
 import React, { BaseSyntheticEvent, Component } from 'react';
-import { Box, Button, FormControl, InputLabel, OutlinedInput } from '@mui/material';
+import { Box, Button, CircularProgress, FormControl, FormHelperText, InputLabel, OutlinedInput } from '@mui/material';
 
 import './AuthForm.scss';
 
 interface IAuthProps {
     onChange: (email, password) => void,
+	isRequesting: boolean,
 }
 
 interface IFormErrors {
@@ -26,7 +27,6 @@ const REGEX = {
     password: /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/,
 }
 
-
 export default class AuthForm extends Component<IAuthProps, IAuthState> {
     constructor(props: IAuthProps) {
         super(props);
@@ -34,9 +34,9 @@ export default class AuthForm extends Component<IAuthProps, IAuthState> {
             email: '',
             password: '',
             formErrors: { email: '', password: '' },
-            emailValid: false,
-            passwordValid: false,
-            formValid: false
+            emailValid: null,
+            passwordValid: null,
+            formValid: false,
         };
     }
 
@@ -97,7 +97,7 @@ export default class AuthForm extends Component<IAuthProps, IAuthState> {
                 onSubmit={this.submit.bind(this)}
                 autoComplete="off">
                     <div className="auth-form-control">
-                        <FormControl>
+                        <FormControl error={this.state.emailValid === false}>
                             <InputLabel htmlFor="email">Email</InputLabel>
                             <OutlinedInput
                                 label="email"
@@ -105,22 +105,31 @@ export default class AuthForm extends Component<IAuthProps, IAuthState> {
                                 type="email"
                                 value={this.state.email}
                                 onChange={this.onChangeControl.bind(this)}
+								aria-describedby="email-error-text"
+								autoComplete="email"
                             />
+							<FormHelperText id="password-error-text">{this.state.formErrors.email}</FormHelperText>
                         </FormControl>
                     </div>
                     <div className="auth-form-control">
-                        <FormControl>
+                        <FormControl error={this.state.passwordValid === false}>
                             <InputLabel htmlFor="password">Password</InputLabel>
                             <OutlinedInput
                                 label="password"
                                 name="password"
                                 type="password"
                                 value={this.state.password}
-                                onChange={this.onChangeControl.bind(this)}
+    			                onChange={this.onChangeControl.bind(this)}
+								aria-describedby="password-error-text"
+  								autoComplete="current-password"
                             />
+							<FormHelperText id="password-error-text">{this.state.formErrors.password}</FormHelperText>
                         </FormControl>
                     </div>
-                <Button variant="contained" type="submit">Send</Button>
+                <Button disabled={!this.state.formValid || this.props.isRequesting} variant="contained" type="submit">
+					{this.props.isRequesting && <CircularProgress className="circular" size={20}/>}
+					Send
+				</Button>
 
                 <div className="validator">
                     email: <strong>{this.state.email || 'empty'}</strong>,

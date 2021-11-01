@@ -7,4 +7,16 @@
     &-control {
         margin-bottom: 20px;
     }
+
+	.MuiFormControl-root {
+		width: 300px;
+	}
+}
+.validator {
+	margin-top: 20px;
+}
+
+.circular.MuiCircularProgress-root {
+	margin-right: 10px;
+	color: #fff;
 }
