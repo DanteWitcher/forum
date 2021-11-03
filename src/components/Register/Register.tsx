@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import { generatePath } from 'react-router';
-import { filter, finalize, Subject, takeUntil } from 'rxjs';
+import { finalize, Subject, switchMap, takeUntil } from 'rxjs';
 import AuthService from '../../core/AuthService';
 import AuthForm from '../shared/AuthForm/AuthForm';
 
@@ -29,6 +28,7 @@ export default class Register extends Component<IRegisterProps, IRegisterState> 
 		this.setState({ isRequesting: true });
 
         AuthService.register(email, password).pipe(
+            switchMap(() => AuthService.login(email, password)),
 			finalize(() => this.setState({ isRequesting: false })),
 			takeUntil(this.destroy$),
 		).subscribe(() => {

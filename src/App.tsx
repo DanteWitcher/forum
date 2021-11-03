@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Switch, Route, Link, withRouter, RouteComponentProps } from 'react-router-dom';
 import { GuardedRoute, GuardProvider } from 'react-router-guards';
-import { filter, Subject, takeUntil } from 'rxjs';
+import { combineLatest, distinctUntilChanged, Subject, takeUntil, tap } from 'rxjs';
 
 import Login from './components/Login/Login.lazy';
 import Register from './components/Register/Register.lazy';
@@ -47,12 +47,17 @@ class App extends Component<RouteComponentProps, IAppState> {
 	};
 
 	componentDidMount() {
-		AuthService.isLogged$.pipe(
-			takeUntil(this.destroy$),
-		).subscribe((value: boolean) => {
-			this.setState({ isLogged: value });
-			this.props.history.push('/');
-		});
+        combineLatest([
+            AuthService.checkToken(),
+            AuthService.isLogin$.pipe(
+                distinctUntilChanged(),
+                tap((value: boolean) => {
+                    this.setState({ isLogged: value });
+                    this.props.history.push('/');
+                })),
+        ]).pipe(
+            takeUntil(this.destroy$),
+        ).subscribe();
 	}
 
 	componentWillUnmount() {
