@@ -1,7 +1,9 @@
-import EditIcon from '@mui/icons-material/Edit';
-import { Avatar, Button, Card, CardContent, CardHeader } from '@mui/material';
 import React, { Component } from 'react';
-import PropertyValue from '../shared/PropertyValue/PropertyValue';
+import { Link, Switch } from 'react-router-dom';
+import { GuardedRoute, GuardProvider } from 'react-router-guards';
+import ProfileAdd from '../ProfileAdd/ProfileAdd';
+import ProfileEdit from '../ProfileEdit/ProfileEdit';
+import ProfileView from '../ProfileView/ProfileView';
 import './Profile.scss';
 
 interface IProfileProps {}
@@ -39,35 +41,37 @@ export default class Profile extends Component<IProfileProps, IProfileState> {
         this.editProfile = this.editProfile.bind(this);
     }
 
-    getFullName() {
-        return `${this.state.lastName} ${this.state.firstName} ${this.state.middleName}`; 
-    }
-
     editProfile($event) {
         $event.preventDefault();
 
         console.log('edit');
     }
 
+	profileGuard = (to, from, next) => {
+		console.log('Profile guard...');
+
+		return next();
+	};
+
     render() {
         return (
-            <div className="profile">
-                <h1>Profile</h1>
-                <Card variant="outlined">
-                    <CardHeader
-                    avatar={<Avatar sx={{ width: 60, height: 60 }} src={this.state.photoUrl} aria-label="recipe"></Avatar>}
-                    action={<Button onClick={this.editProfile}><EditIcon/></Button>}/>
-                    <CardContent>
-                        <PropertyValue property='email' value={this.state.email} showDivider={true}></PropertyValue>
-                        <PropertyValue property='role' value={this.state.role} showDivider={true}></PropertyValue>
-                        <PropertyValue property='nickName' value={this.state.nickName} showDivider={true}></PropertyValue>
-                        <PropertyValue property='fullName' value={this.getFullName()} showDivider={true}></PropertyValue>
-                        <PropertyValue property='phone' value={this.state.phone} showDivider={true}></PropertyValue>
-                        <PropertyValue property='createDateTime' value={this.state.createDateTime} showDivider={true}></PropertyValue>
-                        <PropertyValue property='fullName' value={this.state.lastChangedDateTime} showDivider={true}></PropertyValue>
-                    </CardContent>
-                </Card>
-            </div>
+			<div className="profile">
+            	<h1>Profile</h1>
+				<GuardProvider guards={[this.profileGuard]}>
+					{<Link to="/profile/edit">To Edit<br/></Link>}
+                    {<Link to="/profile/add">To Add<br/></Link>}
+
+					<Switch>
+						<GuardedRoute path="/profile/edit">
+							<ProfileEdit></ProfileEdit>
+						</GuardedRoute>
+						<GuardedRoute path="/profile/add">
+							<ProfileAdd></ProfileAdd>
+						</GuardedRoute>
+						<ProfileView></ProfileView>
+					</Switch>	
+				</GuardProvider>
+			</div>
         );
     }
 };

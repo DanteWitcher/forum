@@ -27,7 +27,7 @@ class App extends Component<RouteComponentProps, IAppState> {
 	}
 
 	appGuard = (to, from, next) => {
-		console.log('guard...');
+		console.log('App guard...');
 
 		// if (['/login', '/register'].includes(to.match.path)) {
 		// 	if (this.state.isLogged) {

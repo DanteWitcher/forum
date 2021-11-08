@@ -1,12 +1,12 @@
 import EditIcon from '@mui/icons-material/Edit';
-import { Avatar, Card, CardContent, CardHeader } from '@mui/material';
+import { Avatar, Button, Card, CardContent, CardHeader } from '@mui/material';
 import React, { Component } from 'react';
 import PropertyValue from '../shared/PropertyValue/PropertyValue';
-import './Profile.scss';
+import './ProfileView.scss';
 
-interface IProfileProps {}
+interface IProfileViewProps {}
 
-interface IProfileState {
+interface IProfileViewState {
     email: string;
     nickName: string;
     firstName: string;
@@ -19,8 +19,8 @@ interface IProfileState {
     photoUrl: string;
 }
 
-export default class Profile extends Component<IProfileProps, IProfileState> {
-    constructor(props: IProfileProps) {
+export default class ProfileView extends Component<IProfileViewProps, IProfileViewState> {
+    constructor(props: IProfileViewProps) {
         super(props);
 
         this.state = {
@@ -51,12 +51,12 @@ export default class Profile extends Component<IProfileProps, IProfileState> {
 
     render() {
         return (
-            <div className="profile">
-                <h1>Profile</h1>
+            <div className="profile-view">
+                <h1>Profile View</h1>
                 <Card variant="outlined">
                     <CardHeader
-                    avatar={<Avatar sx={{ width: 60, height: 60 }} src={this.state.photoUrl} aria-label="recipe"></Avatar>}
-                    action={<EditIcon onClick={this.editProfile}/>}/>
+                    	avatar={<Avatar sx={{ width: 60, height: 60 }} src={this.state.photoUrl} aria-label="recipe"></Avatar>}
+                    	action={<Button onClick={this.editProfile}><EditIcon/></Button>}/>
                     <CardContent>
                         <PropertyValue property='email' value={this.state.email} showDivider={true}></PropertyValue>
                         <PropertyValue property='role' value={this.state.role} showDivider={true}></PropertyValue>
