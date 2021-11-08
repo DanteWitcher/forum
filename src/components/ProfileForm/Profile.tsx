@@ -1,5 +1,5 @@
 import EditIcon from '@mui/icons-material/Edit';
-import { Avatar, Button, Card, CardContent, CardHeader } from '@mui/material';
+import { Avatar, Card, CardContent, CardHeader } from '@mui/material';
 import React, { Component } from 'react';
 import PropertyValue from '../shared/PropertyValue/PropertyValue';
 import './Profile.scss';
@@ -56,7 +56,7 @@ export default class Profile extends Component<IProfileProps, IProfileState> {
                 <Card variant="outlined">
                     <CardHeader
                     avatar={<Avatar sx={{ width: 60, height: 60 }} src={this.state.photoUrl} aria-label="recipe"></Avatar>}
-                    action={<Button onClick={this.editProfile}><EditIcon/></Button>}/>
+                    action={<EditIcon onClick={this.editProfile}/>}/>
                     <CardContent>
                         <PropertyValue property='email' value={this.state.email} showDivider={true}></PropertyValue>
                         <PropertyValue property='role' value={this.state.role} showDivider={true}></PropertyValue>

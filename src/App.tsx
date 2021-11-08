@@ -29,19 +29,19 @@ class App extends Component<RouteComponentProps, IAppState> {
 	appGuard = (to, from, next) => {
 		console.log('guard...');
 
-		if (['/login', '/register'].includes(to.match.path)) {
-			if (this.state.isLogged) {
-				return next.redirect('/');
-			}
+		// if (['/login', '/register'].includes(to.match.path)) {
+		// 	if (this.state.isLogged) {
+		// 		return next.redirect('/');
+		// 	}
 
-			if (!this.state.isLogged) {
-				return next();
-			}
-		}
+		// 	if (!this.state.isLogged) {
+		// 		return next();
+		// 	}
+		// }
 
-		if (!this.state.isLogged) {
-			return next.redirect(from.match.path);
-		}
+		// if (!this.state.isLogged) {
+		// 	return next.redirect(from.match.path);
+		// }
 
 		return next();
 	};
@@ -70,7 +70,8 @@ class App extends Component<RouteComponentProps, IAppState> {
                 <GuardProvider guards={[this.appGuard]} loading={'Loading...'} error={'Not Found'}>
                     {!this.state.isLogged && <Link to="/register">To Register<br/></Link>}
                     {!this.state.isLogged && (<Link to="/login">To Login<br/></Link>)}
-                    {this.state.isLogged && <Link to="/profile">To Profile</Link>}
+                    {/*this.state.isLogged && */<Link to="/profile">To Profile<br/></Link>}
+                    {<Link to="/">To Home<br/></Link>}
                     <Switch>
                         <GuardedRoute path="/profile">
                             <Profile />
