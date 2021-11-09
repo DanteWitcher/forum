@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import ProfileForm from '../ProfileForm/ProfileForm';
+import ProfileForm from '../shared/ProfileForm/ProfileForm';
 import './ProfileAdd.scss';
 
 interface IProfileAddProps {}
@@ -16,6 +16,7 @@ export default class ProfileAdd extends Component<IProfileAddProps, IProfileAddS
     render() {
         return (
             <div className="profile-edit">
+                <h1>Profile Add</h1>
                 <ProfileForm></ProfileForm>
             </div>
         );

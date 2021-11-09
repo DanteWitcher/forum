@@ -1,0 +1,18 @@
+.profile-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    &__full-name {
+        div.MuiFormControl-root {
+            margin: 20px 20px 20px 0;
+        }
+    }
+
+    &__addition {
+        div.MuiFormControl-root {
+            margin: 20px 20px 20px 0;
+        }
+    }
+}

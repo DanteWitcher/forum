@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import ProfileForm from '../ProfileForm/ProfileForm';
+import ProfileForm from '../shared/ProfileForm/ProfileForm';
 import './ProfileEdit.scss';
 
 interface IProfileEditProps {}
@@ -17,7 +17,7 @@ interface IProfileEditState {
 	photoUrl: string;
 }
 
-export default class Profile extends Component<IProfileEditProps, IProfileEditState> {
+export default class ProfileEdit extends Component<IProfileEditProps, IProfileEditState> {
     constructor(props: IProfileEditProps) {
         super(props);
 
