@@ -15,4 +15,14 @@
             margin: 20px 20px 20px 0;
         }
     }
+
+    &__upload {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+    }
+
+    &__loading {
+        margin-bottom: 10px;
+    }
 }

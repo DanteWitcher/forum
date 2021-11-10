@@ -1,13 +1,16 @@
 import { SimpleFileUpload } from 'formik-mui';
-import { Formik, Form, Field, ErrorMessage } from 'formik';
+import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
-import { Button, LinearProgress, OutlinedInput, TextField } from '@mui/material';
+import { Avatar, Button, LinearProgress, TextField } from '@mui/material';
 import React, { Component } from 'react';
+
 import './ProfileForm.scss';
 
-interface IProfileFormProps {}
+interface IProfileFormProps {
+    onSubmit: (form: IProfileForm) => void;
+}
 
-interface IProfileFormState {
+export interface IProfileForm {
     nickName: string;
     firstName: string;
     middleName: string;
@@ -16,48 +19,11 @@ interface IProfileFormState {
 	photoUrl: string;
 }
 
-export default class Profile extends Component<IProfileFormProps, IProfileFormState> {
+export default class Profile extends Component<IProfileFormProps, IProfileForm> {
     constructor(props: IProfileFormProps) {
         super(props);
 
         this.state = {
-            photoUrl: 'https://klike.net/uploads/posts/2019-03/1551513992_3.jpg',
-            nickName: 'DanteWitcher',
-            firstName: 'Александр',
-            middleName: 'Иванович',
-            lastName: 'Каханович',
-            phone: '+375292595376',
-        };
-
-        this.editProfile = this.editProfile.bind(this);
-    }
-
-    editProfile($event) {
-        $event.preventDefault();
-
-        console.log('edit');
-    }
-
-    validationSchema() {
-        return Yup.object().shape({
-            firstName: Yup.string()
-                .min(6, 'First name must be at least 6 characters')
-                .max(20, 'First name must not exceed 20 characters'),
-            middleName: Yup.string()
-                .min(6, 'Middle name must be at least 6 characters')
-                .max(20, 'Middle name must not exceed 20 characters'),
-            lastName: Yup.string()
-                .min(6, 'Last name must be at least 6 characters')
-                .max(40, 'Last name must not exceed 40 characters'),
-            phone: Yup.string()
-                .min(6, 'Phone must be at least 6 characters')
-                .max(40, 'Phone must not exceed 40 characters'),
-            photoUrl: Yup.string(),
-        })
-    };
-
-    render() {
-        const initialValues = {
             nickName: '',
             firstName: '',
             middleName: '',
@@ -66,81 +32,144 @@ export default class Profile extends Component<IProfileFormProps, IProfileFormSt
             photoUrl: '',
         };
 
-        
+        this.editProfile = this.editProfile.bind(this);
+        this.uploadFile = this.uploadFile.bind(this);
+    }
 
+    editProfile(form: IProfileForm) {
+        this.props.onSubmit(form);
+    }
+
+    isNotTouched(touched: {}): boolean {
+        return touched && Object.keys(touched).length === 0 && Object.getPrototypeOf(touched) === Object.prototype;
+    }
+
+    validationSchema() {
+        return Yup.object().shape({
+            firstName: Yup.string()
+                .trim()
+                .min(2, 'First name must be at least 2 characters')
+                .max(20, 'First name must not exceed 20 characters'),
+            middleName: Yup.string()
+                .trim()
+                .min(2, 'Middle name must be at least 2 characters')
+                .max(20, 'Middle name must not exceed 20 characters'),
+            lastName: Yup.string()
+                .trim()
+                .min(2, 'Last name must be at least 2 characters')
+                .max(40, 'Last name must not exceed 40 characters'),
+            nickName: Yup.string()
+                .trim()
+                .required('Field is required')
+                .min(2, 'nickName must be at least 2 characters')
+                .max(40, 'nickName must not exceed 40 characters'),
+            phone: Yup.string()
+                .trim()
+                .min(2, 'Phone must be at least 2 characters')
+                .max(10, 'Phone must not exceed 10 characters'),
+            photoUrl: Yup.string().trim(),
+        })
+    };
+
+    uploadFile(event) {
+        if (event.target.files && event.target.files[0]) {
+            this.setState({
+                photoUrl: URL.createObjectURL(event.target.files[0]),
+            });
+        }
+    }
+
+    render() {
         return (
             <div className="profile-form">
                 <h1>Profile Form</h1>
-
+                
 				<Formik
-					initialValues={initialValues}
+					initialValues={{...this.state}}
 					validationSchema={this.validationSchema}
-					onSubmit={this.editProfile}
-					>
+					onSubmit={this.editProfile}>
 					{({ 
                         values: { firstName, lastName, middleName, nickName, phone, photoUrl },
                         submitForm,
-                        isSubmitting, 
+                        isSubmitting,
+                        isValid,
                         touched, 
                         errors, 
                         handleChange, 
                         setFieldTouched, 
                     }) => {
-                        const change = (name, e) => {
+                        const change = (name: string, e) => {
                             e.persist();
                             handleChange(e);
                             setFieldTouched(name, true, false);
                         };
 
 						return (<Form>
-							<Field component={SimpleFileUpload} name="file" label="Simple File Upload" />
+                            <div className="profile-form__upload">
+                                <input type="file" name="file" onChange={this.uploadFile} />
+                                {/* <Field component={SimpleFileUpload} name="file" label="Simple File Upload" onChange={this.uploadFile} /> */}
+                                <Avatar sx={{ width: 60, height: 60 }} src={this.state.photoUrl} aria-label="recipe"></Avatar>
+                            </div>
                             <div className="profile-form__full-name">
                                 <TextField
-                                    helperText={touched.lastName ? errors.lastName : ""}
-                                    error={touched.lastName && Boolean(errors.lastName)}
+                                    id="lastName"
+                                    type="text"
                                     name="lastName"
                                     label="LastName"
-                                    type="text"
+                                    value={lastName}
+                                    helperText={touched.lastName && errors.lastName}
+                                    error={touched.lastName && Boolean(errors.lastName)}
                                     onChange={change.bind(null, "lastName")}
                                 />
                                 <TextField
+                                    id="firstName"
                                     type="text"
                                     label="FirstName"
                                     name="firstName"
+                                    value={firstName}
+                                    helperText={touched.firstName && errors.firstName}
+                                    error={touched.firstName && Boolean(errors.firstName)}
+                                    onChange={change.bind(null, "firstName")}
                                 />
-                                <ErrorMessage
-                                    name="firstName"
-                                    component="div"
-                                    className="text-danger"
-                                />
-                                <Field
-                                    component={TextField}
+                                <TextField
+                                    id="middleName"
                                     type="text"
                                     label="MiddleName"
                                     name="middleName"
+                                    value={middleName}
+                                    helperText={touched.middleName && errors.middleName}
+                                    error={touched.middleName && Boolean(errors.middleName)}
+                                    onChange={change.bind(null, "middleName")}
                                 />
                             </div>
                             <div className="profile-form__addition">
-                                <Field
-                                    component={TextField}
+                                <TextField
+                                    id="nickName"
+                                    type="text"
                                     name="nickName"
-                                    type="text"
                                     label="NickName"
+                                    value={nickName}
+                                    helperText={touched.nickName && errors.nickName}
+                                    error={touched.nickName && Boolean(errors.nickName)}
+                                    onChange={change.bind(null, "nickName")}
                                 />
-                                <Field
-                                    component={TextField}
-                                    name="phone"
+                                <TextField
+                                    id="phone"
                                     type="text"
+                                    name="phone"
                                     label="Phone"
+                                    value={phone}
+                                    helperText={touched.phone && errors.phone}
+                                    error={touched.phone && Boolean(errors.phone)}
+                                    onChange={change.bind(null, "phone")}
                                 />
-                                {isSubmitting && <LinearProgress />}
                             </div>
-                            
+                            <div className="profile-form__loading">{isSubmitting && <LinearProgress />}</div>
 							<Button
                                 type="submit"
 								variant="contained"
 								color="primary"
-								disabled={isSubmitting}
+								disabled={this.isNotTouched(touched) || !isValid || isSubmitting}
 								onClick={submitForm}
 							>
 								Submit

@@ -10,7 +10,6 @@ interface ILoginState {
 	isRequesting: boolean,
 }
 
-
 export default class Login extends Component<ILoginProps, ILoginState> {
     destroy$: Subject<void> = new Subject();
 

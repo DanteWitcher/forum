@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import ProfileForm from '../shared/ProfileForm/ProfileForm';
+import ProfileForm, { IProfileForm } from '../shared/ProfileForm/ProfileForm';
 import './ProfileAdd.scss';
 
 interface IProfileAddProps {}
@@ -13,11 +13,15 @@ export default class ProfileAdd extends Component<IProfileAddProps, IProfileAddS
         this.state = {};
     }
 
+    addProfile = (form: IProfileForm) => {
+        console.log('add', form);
+    }
+
     render() {
         return (
             <div className="profile-edit">
                 <h1>Profile Add</h1>
-                <ProfileForm></ProfileForm>
+                <ProfileForm onSubmit={this.addProfile}></ProfileForm>
             </div>
         );
     }

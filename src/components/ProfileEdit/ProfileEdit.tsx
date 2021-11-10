@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import ProfileForm from '../shared/ProfileForm/ProfileForm';
+import ProfileForm, { IProfileForm } from '../shared/ProfileForm/ProfileForm';
 import './ProfileEdit.scss';
 
 interface IProfileEditProps {}
@@ -37,17 +37,15 @@ export default class ProfileEdit extends Component<IProfileEditProps, IProfileEd
         this.editProfile = this.editProfile.bind(this);
     }
 
-    editProfile($event) {
-        $event.preventDefault();
-
-        console.log('edit');
+    editProfile = (form: IProfileForm) => {
+        console.log('edit', form);
     }
 
     render() {
         return (
             <div className="profile-edit">
                 <h1>Profile Edit</h1>
-				<ProfileForm></ProfileForm>
+				<ProfileForm onSubmit={this.editProfile}></ProfileForm>
             </div>
         );
     }
