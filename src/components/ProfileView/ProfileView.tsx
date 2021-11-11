@@ -4,7 +4,9 @@ import React, { Component } from 'react';
 import PropertyValue from '../shared/PropertyValue/PropertyValue';
 import './ProfileView.scss';
 
-interface IProfileViewProps {}
+interface IProfileViewProps {
+	onEdit: () => void;
+}
 
 interface IProfileViewState {
     email: string;
@@ -46,7 +48,7 @@ export default class ProfileView extends Component<IProfileViewProps, IProfileVi
     editProfile($event) {
         $event.preventDefault();
 
-        console.log('edit');
+        this.props.onEdit();
     }
 
     render() {

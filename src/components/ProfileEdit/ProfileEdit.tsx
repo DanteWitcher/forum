@@ -2,7 +2,9 @@ import React, { Component } from 'react';
 import ProfileForm, { IProfileFormState } from '../shared/ProfileForm/ProfileForm';
 import './ProfileEdit.scss';
 
-interface IProfileEditProps {}
+interface IProfileEditProps {
+    onSubmit: (form: any, profileForm: any) => void;
+}
 
 interface IProfileEditState {
     email: string;
@@ -38,7 +40,14 @@ export default class ProfileEdit extends Component<IProfileEditProps, IProfileEd
     }
 
     editProfile = (form: IProfileFormState) => {
-        console.log('edit', form);
+        console.log('editing');
+
+		const {
+			photo,
+			...profileForm
+		} = form;
+
+		this.props.onSubmit(form.photo.file, profileForm);
     }
 
     render() {

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Switch, Route, Link, withRouter, RouteComponentProps } from 'react-router-dom';
 import { GuardedRoute, GuardProvider } from 'react-router-guards';
-import { combineLatest, distinctUntilChanged, iif, of, Subject, takeUntil, tap } from 'rxjs';
+import { combineLatest, distinctUntilChanged, map, Observable, of, Subject, switchMap, takeUntil, tap } from 'rxjs';
 
 import Login from './components/Login/Login.lazy';
 import Register from './components/Register/Register.lazy';
@@ -12,6 +12,7 @@ import AuthService from './core/AuthService';
 
 import './App.scss';
 import ProfileService from './core/ProfileService';
+import { IProfile } from './shared/interfaces/profile.interface';
 
 interface IAppState {
 	isLogged: boolean,
@@ -22,6 +23,7 @@ class App extends Component<RouteComponentProps, IAppState> {
 
 	constructor(props) {
 		super(props);
+
 		this.state = {
 			isLogged: null,
 		};
@@ -30,34 +32,46 @@ class App extends Component<RouteComponentProps, IAppState> {
 	appGuard = (to, from, next) => {
 		console.log('App guard...');
 
-		// if (['/login', '/register'].includes(to.match.path)) {
-		// 	if (this.state.isLogged) {
-		// 		return next.redirect('/');
-		// 	}
+		if (['/login', '/register'].includes(to.match.path)) {
+			if (this.state.isLogged) {
+				return next.redirect('/');
+			}
 
-		// 	if (!this.state.isLogged) {
-		// 		return next();
-		// 	}
-		// }
+			if (!this.state.isLogged) {
+				return next();
+			}
+		}
 
-		// if (!this.state.isLogged) {
-		// 	return next.redirect(from.match.path);
-		// }
+		if (!this.state.isLogged) {
+			return next.redirect(from.match.path);
+		}
 
 		return next();
 	};
 
+	isLoginPipe$(): Observable<IProfile> {
+		return AuthService.isLogin$.pipe(
+			distinctUntilChanged(),
+			tap((value: boolean) => (this.setState({ isLogged: value }))),
+			switchMap((value) => (value ? ProfileService.getProfile() : of(null))),
+			// TODO: rework this fucking mapper
+			map((response) => response?.data),
+			tap((profile: IProfile) => {
+				if (!profile) {
+					// TODO: add guard of profile for create router, I mean this: 
+					// if profile exist so you can't got to profile/create
+					this.props.history.push('/profile/add');
+				} else {
+					this.props.history.push('/');
+					//TODO: add state for profile
+				}}),
+			);
+	}
+
 	componentDidMount() {
         combineLatest([
             AuthService.checkToken(),
-            AuthService.isLogin$.pipe(
-                distinctUntilChanged(),
-                tap((value: boolean) => {
-                    this.setState({ isLogged: value });
-                    this.props.history.push('/');
-
-					return iif(() => value, ProfileService.getProfile(), of(null));
-                })),
+			this.isLoginPipe$(),
         ]).pipe(
             takeUntil(this.destroy$),
         ).subscribe();
@@ -73,7 +87,7 @@ class App extends Component<RouteComponentProps, IAppState> {
                 <GuardProvider guards={[this.appGuard]} loading={'Loading...'} error={'Not Found'}>
                     {!this.state.isLogged && <Link to="/register">To Register<br/></Link>}
                     {!this.state.isLogged && (<Link to="/login">To Login<br/></Link>)}
-                    {/*this.state.isLogged && */<Link to="/profile">To Profile<br/></Link>}
+                    {this.state.isLogged && <Link to="/profile">To Profile<br/></Link>}
                     {<Link to="/">To Home<br/></Link>}
                     <Switch>
                         <GuardedRoute path="/profile">
