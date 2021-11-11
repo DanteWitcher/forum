@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Switch, Route, Link, withRouter, RouteComponentProps } from 'react-router-dom';
 import { GuardedRoute, GuardProvider } from 'react-router-guards';
-import { combineLatest, distinctUntilChanged, Subject, takeUntil, tap } from 'rxjs';
+import { combineLatest, distinctUntilChanged, iif, of, Subject, takeUntil, tap } from 'rxjs';
 
 import Login from './components/Login/Login.lazy';
 import Register from './components/Register/Register.lazy';
@@ -11,6 +11,7 @@ import Profile from './components/Profile/Profile.lazy';
 import AuthService from './core/AuthService';
 
 import './App.scss';
+import ProfileService from './core/ProfileService';
 
 interface IAppState {
 	isLogged: boolean,
@@ -54,6 +55,8 @@ class App extends Component<RouteComponentProps, IAppState> {
                 tap((value: boolean) => {
                     this.setState({ isLogged: value });
                     this.props.history.push('/');
+
+					return iif(() => value, ProfileService.getProfile(), of(null));
                 })),
         ]).pipe(
             takeUntil(this.destroy$),

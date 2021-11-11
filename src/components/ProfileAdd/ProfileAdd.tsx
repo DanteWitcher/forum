@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
-import ProfileForm, { IProfileForm } from '../shared/ProfileForm/ProfileForm';
+import { Subject, switchMap, takeUntil } from 'rxjs';
+import FilesService from '../../core/FilesService';
+import ProfileService from '../../core/ProfileService';
+import ProfileForm, { IProfileFormState } from '../shared/ProfileForm/ProfileForm';
 import './ProfileAdd.scss';
 
 interface IProfileAddProps {}
@@ -7,14 +10,30 @@ interface IProfileAddProps {}
 interface IProfileAddState {}
 
 export default class ProfileAdd extends Component<IProfileAddProps, IProfileAddState> {
-    constructor(props: IProfileAddProps) {
+    destroy$: Subject<void> = new Subject();
+	
+	constructor(props: IProfileAddProps) {
         super(props);
 
         this.state = {};
     }
 
-    addProfile = (form: IProfileForm) => {
-        console.log('add', form);
+	componentWillUnmount() {
+		this.destroy$.next();
+	}
+
+    addProfile = (form: IProfileFormState) => {
+		const {
+			photo,
+			...profileForm
+		} = form;
+
+		return FilesService.uploadFile(form.photo.file).pipe(
+			switchMap((resp: any) => ProfileService.createProfile({ ...profileForm, photoUrl: resp.data.data })),
+			takeUntil(this.destroy$),
+		).subscribe(() => {
+			console.log('Added....');
+		});
     }
 
     render() {

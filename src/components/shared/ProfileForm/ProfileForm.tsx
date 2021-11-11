@@ -1,5 +1,4 @@
-import { SimpleFileUpload } from 'formik-mui';
-import { Formik, Form, Field } from 'formik';
+import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import { Avatar, Button, LinearProgress, TextField } from '@mui/material';
 import React, { Component } from 'react';
@@ -7,19 +6,22 @@ import React, { Component } from 'react';
 import './ProfileForm.scss';
 
 interface IProfileFormProps {
-    onSubmit: (form: IProfileForm) => void;
+    onSubmit: (form: IProfileFormState) => void;
 }
 
-export interface IProfileForm {
+export interface IProfileFormState {
     nickName: string;
     firstName: string;
     middleName: string;
     lastName: string;
     phone: string;
-	photoUrl: string;
+	photo: {
+		url: string,
+		file: any
+	};
 }
 
-export default class Profile extends Component<IProfileFormProps, IProfileForm> {
+export default class Profile extends Component<IProfileFormProps, IProfileFormState> {
     constructor(props: IProfileFormProps) {
         super(props);
 
@@ -29,15 +31,19 @@ export default class Profile extends Component<IProfileFormProps, IProfileForm> 
             middleName: '',
             lastName: '',
             phone: '',
-            photoUrl: '',
+			photo: {
+				url: '',
+				file: null,
+			},
         };
 
-        this.editProfile = this.editProfile.bind(this);
+        this.submit = this.submit.bind(this);
         this.uploadFile = this.uploadFile.bind(this);
     }
 
-    editProfile(form: IProfileForm) {
-        this.props.onSubmit(form);
+    submit(form: IProfileFormState) {
+		const data = { ...form, photo: this.state.photo };
+        this.props.onSubmit(data);
     }
 
     isNotTouched(touched: {}): boolean {
@@ -74,7 +80,10 @@ export default class Profile extends Component<IProfileFormProps, IProfileForm> 
     uploadFile(event) {
         if (event.target.files && event.target.files[0]) {
             this.setState({
-                photoUrl: URL.createObjectURL(event.target.files[0]),
+				photo: {
+					url: URL.createObjectURL(event.target.files[0]),
+					file: event.target.files[0],
+				},
             });
         }
     }
@@ -87,9 +96,9 @@ export default class Profile extends Component<IProfileFormProps, IProfileForm> 
 				<Formik
 					initialValues={{...this.state}}
 					validationSchema={this.validationSchema}
-					onSubmit={this.editProfile}>
+					onSubmit={this.submit}>
 					{({ 
-                        values: { firstName, lastName, middleName, nickName, phone, photoUrl },
+                        values: { firstName, lastName, middleName, nickName, phone },
                         submitForm,
                         isSubmitting,
                         isValid,
@@ -106,9 +115,8 @@ export default class Profile extends Component<IProfileFormProps, IProfileForm> 
 
 						return (<Form>
                             <div className="profile-form__upload">
-                                <input type="file" name="file" onChange={this.uploadFile} />
-                                {/* <Field component={SimpleFileUpload} name="file" label="Simple File Upload" onChange={this.uploadFile} /> */}
-                                <Avatar sx={{ width: 60, height: 60 }} src={this.state.photoUrl} aria-label="recipe"></Avatar>
+                                <input id="photo" type="file" name="photo" onChange={this.uploadFile}/>
+                                <Avatar sx={{ width: 60, height: 60 }} src={this.state.photo.url} aria-label="recipe"></Avatar>
                             </div>
                             <div className="profile-form__full-name">
                                 <TextField
