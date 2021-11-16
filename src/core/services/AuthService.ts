@@ -1,7 +1,7 @@
 import { BehaviorSubject, Observable, of, switchMap, tap, timer } from "rxjs";
-import { decodeTokenToObj, decodeTokenToString } from "../shared/helpers/decode-token";
-import { ITokenData } from "../shared/interfaces/token-data.interface";
-import CONFIG from "./config";
+import { decodeTokenToObj, decodeTokenToString } from "../../shared/helpers/decode-token";
+import { ITokenData } from "../../shared/interfaces/token-data.interface";
+import CONFIG from "../config";
 import HttpsService from "./HttpService";
 import HttpService from "./HttpService";
 

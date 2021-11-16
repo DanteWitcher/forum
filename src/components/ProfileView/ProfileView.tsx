@@ -1,6 +1,7 @@
 import EditIcon from '@mui/icons-material/Edit';
 import { Avatar, Button, Card, CardContent, CardHeader } from '@mui/material';
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import PropertyValue from '../shared/PropertyValue/PropertyValue';
 import './ProfileView.scss';
 
@@ -21,22 +22,11 @@ interface IProfileViewState {
     photoUrl: string;
 }
 
-export default class ProfileView extends Component<IProfileViewProps, IProfileViewState> {
+class ProfileView extends Component<IProfileViewProps, IProfileViewState> {
     constructor(props: IProfileViewProps) {
         super(props);
 
-        this.state = {
-            photoUrl: 'https://klike.net/uploads/posts/2019-03/1551513992_3.jpg',
-            email: 'kakhanovich@email.com',
-            nickName: 'DanteWitcher',
-            firstName: 'Александр',
-            middleName: 'Иванович',
-            lastName: 'Каханович',
-            role: 'ADMIN',
-            phone: '+375292595376',
-            createDateTime: new Date().toString(),
-            lastChangedDateTime: new Date().toString(),
-        };
+        this.state = (this.props as any).prof.myProfile;
 
         this.editProfile = this.editProfile.bind(this);
     }
@@ -57,7 +47,7 @@ export default class ProfileView extends Component<IProfileViewProps, IProfileVi
                 <h1>Profile View</h1>
                 <Card variant="outlined">
                     <CardHeader
-                    	avatar={<Avatar sx={{ width: 60, height: 60 }} src={this.state.photoUrl} aria-label="recipe"></Avatar>}
+                    	avatar={<Avatar sx={{ width: 60, height: 60 }} src={this.state.photoUrl.replace('?dl=0', '?raw=1')} aria-label="recipe"></Avatar>}
                     	action={<Button onClick={this.editProfile}><EditIcon/></Button>}/>
                     <CardContent>
                         <PropertyValue property='email' value={this.state.email} showDivider={true}></PropertyValue>
@@ -73,3 +63,9 @@ export default class ProfileView extends Component<IProfileViewProps, IProfileVi
         );
     }
 };
+
+const mapStateToProps = (state) => ({
+	prof: state.profile,
+});
+
+export default connect(mapStateToProps, null)(ProfileView);

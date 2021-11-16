@@ -4,9 +4,11 @@ import { Avatar, Button, LinearProgress, TextField } from '@mui/material';
 import React, { Component } from 'react';
 
 import './ProfileForm.scss';
+import { IProfile } from '../../../shared/interfaces/profile.interface';
 
 interface IProfileFormProps {
     onSubmit: (form: IProfileFormState) => void;
+	profile: any,
 }
 
 export interface IProfileFormState {
@@ -26,13 +28,13 @@ export default class Profile extends Component<IProfileFormProps, IProfileFormSt
         super(props);
 
         this.state = {
-            nickName: '',
-            firstName: '',
-            middleName: '',
-            lastName: '',
-            phone: '',
+            nickName: this.props.profile.nickName || '',
+            firstName: this.props.profile.firstName ||'',
+            middleName: this.props.profile.middleName || '',
+            lastName: this.props.profile.lastName || '',
+            phone: this.props.profile.phone || '',
 			photo: {
-				url: '',
+				url: this.props.profile?.photoUrl?.replace('?dl=0', '?raw=1') || '',
 				file: null,
 			},
         };
@@ -72,7 +74,7 @@ export default class Profile extends Component<IProfileFormProps, IProfileFormSt
             phone: Yup.string()
                 .trim()
                 .min(2, 'Phone must be at least 2 characters')
-                .max(10, 'Phone must not exceed 10 characters'),
+                .max(15, 'Phone must not exceed 15 characters'),
             photoUrl: Yup.string().trim(),
         })
     };

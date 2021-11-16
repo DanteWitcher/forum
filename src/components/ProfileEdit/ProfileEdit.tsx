@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import ProfileForm, { IProfileFormState } from '../shared/ProfileForm/ProfileForm';
 import './ProfileEdit.scss';
 
@@ -19,22 +20,24 @@ interface IProfileEditState {
 	photoUrl: string;
 }
 
-export default class ProfileEdit extends Component<IProfileEditProps, IProfileEditState> {
+class ProfileEdit extends Component<IProfileEditProps, IProfileEditState> {
     constructor(props: IProfileEditProps) {
         super(props);
 
-        this.state = {
-            photoUrl: 'https://klike.net/uploads/posts/2019-03/1551513992_3.jpg',
-            email: 'kakhanovich@email.com',
-            nickName: 'DanteWitcher',
-            firstName: 'Александр',
-            middleName: 'Иванович',
-            lastName: 'Каханович',
-            role: 'ADMIN',
-            phone: '+375292595376',
-            createDateTime: new Date().toString(),
-            lastChangedDateTime: new Date().toString(),
-        };
+        this.state = (this.props as any).prof.myProfile;
+
+        // this.state = {
+        //     photoUrl: 'https://klike.net/uploads/posts/2019-03/1551513992_3.jpg',
+        //     email: 'kakhanovich@email.com',
+        //     nickName: 'DanteWitcher',
+        //     firstName: 'Александр',
+        //     middleName: 'Иванович',
+        //     lastName: 'Каханович',
+        //     role: 'ADMIN',
+        //     phone: '+375292595376',
+        //     createDateTime: new Date().toString(),
+        //     lastChangedDateTime: new Date().toString(),
+        // };
 
         this.editProfile = this.editProfile.bind(this);
     }
@@ -54,8 +57,14 @@ export default class ProfileEdit extends Component<IProfileEditProps, IProfileEd
         return (
             <div className="profile-edit">
                 <h1>Profile Edit</h1>
-				<ProfileForm onSubmit={this.editProfile}></ProfileForm>
+				<ProfileForm onSubmit={this.editProfile} profile={this.state}></ProfileForm>
             </div>
         );
     }
 };
+
+const mapStateToProps = (state) => ({
+	prof: state.profile,
+});
+
+export default connect(mapStateToProps, null)(ProfileEdit);

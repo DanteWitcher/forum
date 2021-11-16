@@ -1,6 +1,6 @@
 import axios, { AxiosRequestConfig } from "axios";
 import { from, Observable } from "rxjs";
-import CONFIG from "./config";
+import CONFIG from "../config";
 
 export default class HttpsService {
     static host = `${CONFIG.HOST}:${CONFIG.PORT}`;

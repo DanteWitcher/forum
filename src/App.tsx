@@ -1,24 +1,36 @@
 import React, { Component } from 'react';
 import { Switch, Route, Link, withRouter, RouteComponentProps } from 'react-router-dom';
 import { GuardedRoute, GuardProvider } from 'react-router-guards';
-import { combineLatest, distinctUntilChanged, map, Observable, of, Subject, switchMap, takeUntil, tap } from 'rxjs';
+import { 
+	combineLatest, 
+	distinctUntilChanged,
+	Observable,
+	Subject,
+	takeUntil,
+	tap,
+ } from 'rxjs';
+import { connect } from 'react-redux';
 
 import Login from './components/Login/Login.lazy';
 import Register from './components/Register/Register.lazy';
 import Home from './components/Home/Home.lazy';
 import Profile from './components/Profile/Profile.lazy';
 
-import AuthService from './core/AuthService';
+import AuthService from './core/services/AuthService';
+import { EProfileType } from './core/redux/types/profile.enum';
+import { actions } from './core/redux/actions/profile.action';
 
 import './App.scss';
-import ProfileService from './core/ProfileService';
-import { IProfile } from './shared/interfaces/profile.interface';
 
 interface IAppState {
 	isLogged: boolean,
 }
 
-class App extends Component<RouteComponentProps, IAppState> {
+interface IAppProps extends RouteComponentProps {
+	fetchProfile: Function, 
+}
+
+class App extends Component<IAppProps, IAppState> {
 	destroy$: Subject<void> = new Subject();
 
 	constructor(props) {
@@ -49,23 +61,17 @@ class App extends Component<RouteComponentProps, IAppState> {
 		return next();
 	};
 
-	isLoginPipe$(): Observable<IProfile> {
+	isLoginPipe$(): Observable<boolean> {
 		return AuthService.isLogin$.pipe(
 			distinctUntilChanged(),
-			tap((value: boolean) => (this.setState({ isLogged: value }))),
-			switchMap((value) => (value ? ProfileService.getProfile() : of(null))),
-			// TODO: rework this fucking mapper
-			map((response) => response?.data),
-			tap((profile: IProfile) => {
-				if (!profile) {
-					// TODO: add guard of profile for create router, I mean this: 
-					// if profile exist so you can't got to profile/create
-					this.props.history.push('/profile/add');
-				} else {
-					this.props.history.push('/');
-					//TODO: add state for profile
-				}}),
-			);
+			tap((isLogged: boolean) => {
+				if (isLogged) {
+					this.props.fetchProfile(this.props.history);
+				}
+
+				this.setState({ isLogged });
+			}),
+		);
 	}
 
 	componentDidMount() {
@@ -109,4 +115,6 @@ class App extends Component<RouteComponentProps, IAppState> {
     }
 }
 
-export default withRouter(App);
+const mapDispatchToProps = actions[EProfileType.FETCH_PROFILE];
+
+export default connect(null, mapDispatchToProps)(withRouter(App));

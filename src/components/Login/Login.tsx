@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { finalize, Subject, switchMap, takeUntil } from 'rxjs';
-import AuthService from '../../core/AuthService';
+import AuthService from '../../core/services/AuthService';
 import AuthForm from '../shared/AuthForm/AuthForm';
 
 import './Login.scss';
