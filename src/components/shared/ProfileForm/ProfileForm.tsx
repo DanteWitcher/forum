@@ -4,7 +4,6 @@ import { Avatar, Button, LinearProgress, TextField } from '@mui/material';
 import React, { Component } from 'react';
 
 import './ProfileForm.scss';
-import { IProfile } from '../../../shared/interfaces/profile.interface';
 
 interface IProfileFormProps {
     onSubmit: (form: IProfileFormState) => void;

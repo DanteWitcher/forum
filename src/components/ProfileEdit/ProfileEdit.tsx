@@ -1,43 +1,18 @@
 import React, { Component } from 'react';
-import { connect } from 'react-redux';
+import { IProfile } from '../../shared/interfaces/profile.interface';
 import ProfileForm, { IProfileFormState } from '../shared/ProfileForm/ProfileForm';
 import './ProfileEdit.scss';
 
 interface IProfileEditProps {
     onSubmit: (form: any, profileForm: any) => void;
+	profile: IProfile;
 }
 
-interface IProfileEditState {
-    email: string;
-    nickName: string;
-    firstName: string;
-    middleName: string;
-    lastName: string;
-    role: string;
-    phone: string;
-    createDateTime: string;
-    lastChangedDateTime: string;
-	photoUrl: string;
-}
+interface IProfileEditState {}
 
 class ProfileEdit extends Component<IProfileEditProps, IProfileEditState> {
     constructor(props: IProfileEditProps) {
         super(props);
-
-        this.state = (this.props as any).prof.myProfile;
-
-        // this.state = {
-        //     photoUrl: 'https://klike.net/uploads/posts/2019-03/1551513992_3.jpg',
-        //     email: 'kakhanovich@email.com',
-        //     nickName: 'DanteWitcher',
-        //     firstName: 'Александр',
-        //     middleName: 'Иванович',
-        //     lastName: 'Каханович',
-        //     role: 'ADMIN',
-        //     phone: '+375292595376',
-        //     createDateTime: new Date().toString(),
-        //     lastChangedDateTime: new Date().toString(),
-        // };
 
         this.editProfile = this.editProfile.bind(this);
     }
@@ -57,14 +32,10 @@ class ProfileEdit extends Component<IProfileEditProps, IProfileEditState> {
         return (
             <div className="profile-edit">
                 <h1>Profile Edit</h1>
-				<ProfileForm onSubmit={this.editProfile} profile={this.state}></ProfileForm>
+				<ProfileForm onSubmit={this.editProfile} profile={this.props.profile}></ProfileForm>
             </div>
         );
     }
 };
 
-const mapStateToProps = (state) => ({
-	prof: state.profile,
-});
-
-export default connect(mapStateToProps, null)(ProfileEdit);
+export default ProfileEdit;

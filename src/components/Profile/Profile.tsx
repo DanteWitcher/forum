@@ -1,13 +1,23 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import { Link, RouteComponentProps, Switch, withRouter } from 'react-router-dom';
 import { GuardedRoute, GuardProvider } from 'react-router-guards';
 import { Subject, switchMap, takeUntil } from 'rxjs';
+
 import FilesService from '../../core/services/FilesService';
 import ProfileService from '../../core/services/ProfileService';
+import { IProfile } from '../../shared/interfaces/profile.interface';
+import { IState } from '../../shared/interfaces/state.interface';
 import ProfileAdd from '../ProfileAdd/ProfileAdd';
 import ProfileEdit from '../ProfileEdit/ProfileEdit';
 import ProfileView from '../ProfileView/ProfileView';
+
 import './Profile.scss';
+
+
+export interface IProfileProps extends RouteComponentProps {
+	profile: IProfile,
+}
 
 interface IProfileState {
     email: string;
@@ -22,10 +32,10 @@ interface IProfileState {
     photoUrl: string;
 }
 
-class Profile extends Component<RouteComponentProps, IProfileState> {
+class Profile extends Component<IProfileProps, IProfileState> {
     destroy$: Subject<void> = new Subject();
 	
-	constructor(props: RouteComponentProps) {
+	constructor(props: IProfileProps) {
         super(props);
 
         this.state = {
@@ -48,6 +58,10 @@ class Profile extends Component<RouteComponentProps, IProfileState> {
 
 	profileGuard = (to, from, next) => {
 		console.log('Profile guard...');
+
+		if (to.match.path === '/profile/create' && this.props.profile) {
+			return;
+		}
 
 		return next();
 	};
@@ -78,16 +92,16 @@ class Profile extends Component<RouteComponentProps, IProfileState> {
             	<h1>Profile</h1>
 				<GuardProvider guards={[this.profileGuard]}>
 					{<Link to="/profile/edit">To Edit<br/></Link>}
-                    {<Link to="/profile/add">To Add<br/></Link>}
+                    {<Link to="/profile/create">To Add<br/></Link>}
 
 					<Switch>
 						<GuardedRoute path="/profile/edit">
-							<ProfileEdit onSubmit={this.editProfile}></ProfileEdit>
+							<ProfileEdit profile={this.props.profile} onSubmit={this.editProfile}></ProfileEdit>
 						</GuardedRoute>
-						<GuardedRoute path="/profile/add">
+						<GuardedRoute path="/profile/create">
 							<ProfileAdd onSubmit={this.createProfile}></ProfileAdd>
 						</GuardedRoute>
-						<ProfileView onEdit={this.toEditProfile}></ProfileView>
+						{this.props.profile ? <ProfileView profile={this.props.profile} onEdit={this.toEditProfile}></ProfileView> : <h3>You haven't had profile yet</h3>}
 					</Switch>	
 				</GuardProvider>
 			</div>
@@ -95,4 +109,10 @@ class Profile extends Component<RouteComponentProps, IProfileState> {
     }
 };
 
-export default withRouter(Profile);
+const mapStateToProps = ({ profile }: IState) => {
+	return {
+		profile: profile.myProfile,
+	}
+}
+
+export default connect(mapStateToProps)(withRouter(Profile));

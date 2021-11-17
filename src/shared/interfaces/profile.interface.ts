@@ -10,6 +10,6 @@ export interface IProfile {
 	nickName: string;
 	phone: string;
     photoUrl: string;
-    createDateTime: Date;
-    lastChangedDateTime: Date;
+    createDateTime: string;
+    lastChangedDateTime: string;
 }

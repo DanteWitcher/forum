@@ -30,7 +30,9 @@ export default class ProfileAdd extends Component<IProfileAddProps, IProfileAddS
         return (
             <div className="profile-edit">
                 <h1>Profile Add</h1>
-                <ProfileForm onSubmit={this.addProfile}  profile={{}}></ProfileForm>
+                <ProfileForm onSubmit={this.addProfile}  profile={{
+					
+				}}></ProfileForm>
             </div>
         );
     }

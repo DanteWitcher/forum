@@ -1,12 +1,7 @@
-import { IProfile } from '../../../shared/interfaces/profile.interface';
+import { IProfileState } from '../../../shared/interfaces/state.interface';
 import { EProfileType } from '../types/profile.enum';
 
-interface IInitialState {
-	myProfile: IProfile;
-	profiles: IProfile[];
-}
-
-const initialState: IInitialState = {
+const initialState: IProfileState = {
 	myProfile: null,
 	profiles: [],
 };
