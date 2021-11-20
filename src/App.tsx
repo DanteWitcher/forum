@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Switch, Route, Link, withRouter, RouteComponentProps } from 'react-router-dom';
-import { GuardedRoute, GuardProvider } from 'react-router-guards';
+import { GuardedRoute, GuardProvider, Next } from 'react-router-guards';
 import { 
 	combineLatest, 
 	distinctUntilChanged,
@@ -41,20 +41,22 @@ class App extends Component<IAppProps, IAppState> {
 		};
 	}
 
-	appGuard = (to, from, next) => {
+	appGuard = (to, from, next: Next) => {
 		console.log('App guard...');
 
+		const isLogged = AuthService.isLogin$.getValue();
+
 		if (['/login', '/register'].includes(to.match.path)) {
-			if (this.state.isLogged) {
+			if (isLogged) {
 				return next.redirect('/');
 			}
 
-			if (!this.state.isLogged) {
+			if (!isLogged) {
 				return next();
 			}
 		}
 
-		if (!this.state.isLogged) {
+		if (!isLogged) {
 			return next.redirect(from.match.path);
 		}
 

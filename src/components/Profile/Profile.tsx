@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Link, RouteComponentProps, Switch, withRouter } from 'react-router-dom';
-import { GuardedRoute, GuardProvider } from 'react-router-guards';
+import { GuardedRoute, GuardProvider, Next } from 'react-router-guards';
 import { Subject, switchMap, takeUntil } from 'rxjs';
 
 import FilesService from '../../core/services/FilesService';
@@ -19,48 +19,20 @@ export interface IProfileProps extends RouteComponentProps {
 	profile: IProfile,
 }
 
-interface IProfileState {
-    email: string;
-    nickName: string;
-    firstName: string;
-    middleName: string;
-    lastName: string;
-    role: string;
-    phone: string;
-    createDateTime: string;
-    lastChangedDateTime: string;
-    photoUrl: string;
-}
+interface IProfileState {}
 
 class Profile extends Component<IProfileProps, IProfileState> {
     destroy$: Subject<void> = new Subject();
-	
-	constructor(props: IProfileProps) {
-        super(props);
-
-        this.state = {
-            photoUrl: 'https://klike.net/uploads/posts/2019-03/1551513992_3.jpg',
-            email: 'kakhanovich@email.com',
-            nickName: 'DanteWitcher',
-            firstName: 'Александр',
-            middleName: 'Иванович',
-            lastName: 'Каханович',
-            role: 'ADMIN',
-            phone: '+375292595376',
-            createDateTime: new Date().toString(),
-            lastChangedDateTime: new Date().toString(),
-        };
-    }
 
     toEditProfile = () => {
 		this.props.history.push('/profile/edit');
     }
 
-	profileGuard = (to, from, next) => {
+	profileGuard = (to, from, next: Next) => {
 		console.log('Profile guard...');
 
 		if (to.match.path === '/profile/create' && this.props.profile) {
-			return;
+			return next.redirect(from.match.path);
 		}
 
 		return next();
@@ -71,7 +43,7 @@ class Profile extends Component<IProfileProps, IProfileState> {
 			switchMap((resp: any) => ProfileService.editProfile({ ...profileForm, photoUrl: resp.data.data })),
 			takeUntil(this.destroy$),
 		).subscribe(() => {
-			console.log('Added....');
+			console.log('Edit....');
 			this.props.history.push('/');
 		});
 	}
@@ -81,7 +53,7 @@ class Profile extends Component<IProfileProps, IProfileState> {
 			switchMap((resp: any) => ProfileService.createProfile({ ...profileForm, photoUrl: resp.data.data })),
 			takeUntil(this.destroy$),
 		).subscribe(() => {
-			console.log('Added....');
+			console.log('Create....');
 			this.props.history.push('/');
 		});
 	}
@@ -91,9 +63,8 @@ class Profile extends Component<IProfileProps, IProfileState> {
 			<div className="profile">
             	<h1>Profile</h1>
 				<GuardProvider guards={[this.profileGuard]}>
-					{<Link to="/profile/edit">To Edit<br/></Link>}
-                    {<Link to="/profile/create">To Add<br/></Link>}
-
+                    {this.props.profile ? <Link to="/profile/edit">To Edit</Link> : <Link to="/profile/create">To Add</Link>}
+					<br/>
 					<Switch>
 						<GuardedRoute path="/profile/edit">
 							<ProfileEdit profile={this.props.profile} onSubmit={this.editProfile}></ProfileEdit>
