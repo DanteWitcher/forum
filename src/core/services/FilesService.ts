@@ -5,7 +5,7 @@ export default class FilesService {
 	static uri = `${HttpsService.host}/files`;
 
     static uploadFile(file: any): Observable<any> {
-		const path = `${this.uri}/upload`;
+		const path = `${this.uri}/upload-profile-photo`;
 		const formData = new FormData();
     	formData.append("file", file);
 

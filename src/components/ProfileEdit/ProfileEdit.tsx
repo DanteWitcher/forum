@@ -4,7 +4,7 @@ import ProfileForm, { IProfileFormState } from '../shared/ProfileForm/ProfileFor
 import './ProfileEdit.scss';
 
 interface IProfileEditProps {
-    onSubmit: (form: any, profileForm: any) => void;
+    onSubmit: (photoFile: any, profileForm: any) => void;
 	profile: IProfile;
 }
 

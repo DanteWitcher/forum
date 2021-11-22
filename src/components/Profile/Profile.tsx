@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { Link, RouteComponentProps, Switch, withRouter } from 'react-router-dom';
+import { Link, Route, RouteComponentProps, Switch, withRouter } from 'react-router-dom';
 import { GuardedRoute, GuardProvider, Next } from 'react-router-guards';
-import { Subject, switchMap, takeUntil } from 'rxjs';
+import { defer, of, Subject, switchMap, takeUntil } from 'rxjs';
 
 import FilesService from '../../core/services/FilesService';
 import ProfileService from '../../core/services/ProfileService';
@@ -17,6 +17,8 @@ import './Profile.scss';
 
 export interface IProfileProps extends RouteComponentProps {
 	profile: IProfile,
+	createProfile: Function,
+	editProfile: Function,
 }
 
 interface IProfileState {}
@@ -39,8 +41,10 @@ class Profile extends Component<IProfileProps, IProfileState> {
 	};
 
 	editProfile = (file, profileForm) => {
-		return FilesService.uploadFile(file).pipe(
-			switchMap((resp: any) => ProfileService.editProfile({ ...profileForm, photoUrl: resp.data.data })),
+		return defer(() => Boolean(file) ? FilesService.uploadFile(file) : of(this.props.profile.photoUrl)).pipe(
+			switchMap((resp: any) => {
+				return ProfileService.editProfile({ ...profileForm, photoUrl: resp?.data?.data || resp });
+			}),
 			takeUntil(this.destroy$),
 		).subscribe(() => {
 			console.log('Edit....');
@@ -72,8 +76,10 @@ class Profile extends Component<IProfileProps, IProfileState> {
 						<GuardedRoute path="/profile/create">
 							<ProfileAdd onSubmit={this.createProfile}></ProfileAdd>
 						</GuardedRoute>
-						{this.props.profile ? <ProfileView profile={this.props.profile} onEdit={this.toEditProfile}></ProfileView> : <h3>You haven't had profile yet</h3>}
-					</Switch>	
+						<Route path="/profile/">
+							{this.props.profile ? <ProfileView profile={this.props.profile} onEdit={this.toEditProfile}></ProfileView> : <h3>You haven't had profile yet</h3>}
+						</Route>
+					</Switch>
 				</GuardProvider>
 			</div>
         );

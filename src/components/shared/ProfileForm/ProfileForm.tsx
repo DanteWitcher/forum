@@ -4,6 +4,7 @@ import { Avatar, Button, LinearProgress, TextField } from '@mui/material';
 import React, { Component } from 'react';
 
 import './ProfileForm.scss';
+import { makeAsImg } from '../../../shared/helpers/make-as-img';
 
 interface IProfileFormProps {
     onSubmit: (form: IProfileFormState) => void;
@@ -11,6 +12,7 @@ interface IProfileFormProps {
 }
 
 export interface IProfileFormState {
+	id?: string;
     nickName: string;
     firstName: string;
     middleName: string;
@@ -26,14 +28,17 @@ export default class Profile extends Component<IProfileFormProps, IProfileFormSt
     constructor(props: IProfileFormProps) {
         super(props);
 
+		const url = makeAsImg(this.props.profile?.photoUrl);
+
         this.state = {
+			id: this.props.profile?.id || '',
             nickName: this.props.profile.nickName || '',
             firstName: this.props.profile.firstName ||'',
             middleName: this.props.profile.middleName || '',
             lastName: this.props.profile.lastName || '',
             phone: this.props.profile.phone || '',
 			photo: {
-				url: this.props.profile?.photoUrl?.replace('?dl=0', '?raw=1') || '',
+				url: url || '',
 				file: null,
 			},
         };
