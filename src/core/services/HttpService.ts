@@ -9,7 +9,11 @@ export default class HttpsService {
         return from(axios.get(path, { withCredentials: true }));
     }
 
-    static post(path: string, data: any, config?: AxiosRequestConfig): Observable<any> {
+    static post(path: string, data: any, config: AxiosRequestConfig = {
+		headers: {
+			'Content-Type': 'application/json',
+		}
+	}): Observable<any> {
         return from(axios.post(path, data, { ...config, withCredentials: true }));    
     }
 

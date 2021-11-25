@@ -5,6 +5,8 @@ import React, { Component } from 'react';
 
 import './ProfileForm.scss';
 import { makeAsImg } from '../../../shared/helpers/make-as-img';
+import ProfileService from '../../../core/services/ProfileService';
+import { debounce, debounceTime, distinctUntilChanged, finalize, Observable, Subject, takeUntil, timer } from 'rxjs';
 
 interface IProfileFormProps {
     onSubmit: (form: IProfileFormState) => void;
@@ -25,6 +27,30 @@ export interface IProfileFormState {
 }
 
 export default class Profile extends Component<IProfileFormProps, IProfileFormState> {
+	destroy$: Subject<void> = new Subject();
+	onSearch$ = new Subject();
+	onNickNameSubscription$: Observable<any>;
+
+	componentDidMount() {
+		this.onNickNameSubscription$ = this.onSearch$.asObservable().pipe(
+			debounceTime(1000),
+			distinctUntilChanged(),
+			finalize(() => setSubmitting(false)),
+			takeUntil(this.destroy$),
+		).subscribe({
+			next: () => {
+				console.log('done');
+			},
+			error: ({ setErrors }) => {
+				setErrors({ nickName: 'nickName has already existed' })
+			}
+		})
+	}
+
+	componentDidUpdate() {
+		this.destroy$.next();
+	}
+
     constructor(props: IProfileFormProps) {
         super(props);
 
@@ -44,7 +70,6 @@ export default class Profile extends Component<IProfileFormProps, IProfileFormSt
         };
 
         this.submit = this.submit.bind(this);
-        this.uploadFile = this.uploadFile.bind(this);
     }
 
     submit(form: IProfileFormState) {
@@ -83,17 +108,6 @@ export default class Profile extends Component<IProfileFormProps, IProfileFormSt
         })
     };
 
-    uploadFile(event) {
-        if (event.target.files && event.target.files[0]) {
-            this.setState({
-				photo: {
-					url: URL.createObjectURL(event.target.files[0]),
-					file: event.target.files[0],
-				},
-            });
-        }
-    }
-
     render() {
         return (
             <div className="profile-form">
@@ -112,16 +126,47 @@ export default class Profile extends Component<IProfileFormProps, IProfileFormSt
                         errors, 
                         handleChange, 
                         setFieldTouched, 
+						setSubmitting,
+						setErrors,
                     }) => {
-                        const change = (name: string, e) => {
-                            e.persist();
-                            handleChange(e);
+                        const change = (name: string, event) => {
+                            event.persist();
+                            handleChange(event);
                             setFieldTouched(name, true, false);
                         };
 
+						const uploadFile = (name: string, event) => {
+							if (event.target.files && event.target.files[0]) {
+								this.setState({
+									photo: {
+										url: URL.createObjectURL(event.target.files[0]),
+										file: event.target.files[0],
+									},
+								});
+
+								change(name, event);
+							}
+						}
+
+						const changeNickName = (name: string, event) => {
+							setSubmitting(true);
+							change(name, event);
+
+							this.onSearch$.next({
+								value: event.target.value,
+								setSubmitting,
+								setErrors,
+							});
+
+							ProfileService.checkNickName().pipe(
+								debounce(() => timer(2000)),
+							);
+						}
+
+
 						return (<Form>
                             <div className="profile-form__upload">
-                                <input id="photo" type="file" name="photo" onChange={this.uploadFile}/>
+                                <input id="photo" type="file" name="photo" onChange={uploadFile.bind(null, 'photo')}/>
                                 <Avatar sx={{ width: 60, height: 60 }} src={this.state.photo.url} aria-label="recipe"></Avatar>
                             </div>
                             <div className="profile-form__full-name">
@@ -165,7 +210,7 @@ export default class Profile extends Component<IProfileFormProps, IProfileFormSt
                                     value={nickName}
                                     helperText={touched.nickName && errors.nickName}
                                     error={touched.nickName && Boolean(errors.nickName)}
-                                    onChange={change.bind(null, "nickName")}
+                                    onChange={changeNickName.bind(null, "nickName")}
                                 />
                                 <TextField
                                     id="phone"

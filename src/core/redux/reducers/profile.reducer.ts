@@ -14,6 +14,18 @@ export const profileReducer = (state = initialState, action) => {
 				...state,
 				myProfile: action.payload,
 			};
+		case EProfileType.PROFILE_CREATED:
+			console.log('PROFILE_CREATED');
+			return { 
+				...state,
+				myProfile: action.payload,
+			};
+		case EProfileType.PROFILE_UPDATED:
+			console.log('PROFILE_UPDATED');
+			return { 
+				...state,
+				myProfile: action.payload,
+			};
 		default:
 			return state;
 	}

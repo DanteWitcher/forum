@@ -10,6 +10,7 @@ import {
 	tap,
  } from 'rxjs';
 import { connect } from 'react-redux';
+import { Button } from '@mui/material';
 
 import Login from './components/Login/Login.lazy';
 import Register from './components/Register/Register.lazy';
@@ -18,9 +19,9 @@ import Profile from './components/Profile/Profile.lazy';
 
 import AuthService from './core/services/AuthService';
 import { EProfileType } from './core/redux/types/profile.enum';
-import { actions } from './core/redux/actions/profile.action';
 
 import './App.scss';
+import { Action, Dispatch } from '@reduxjs/toolkit';
 
 interface IAppState {
 	isLogged: boolean,
@@ -39,6 +40,8 @@ class App extends Component<IAppProps, IAppState> {
 		this.state = {
 			isLogged: null,
 		};
+
+		this.logOut = this.logOut.bind(this);
 	}
 
 	appGuard = (to, from, next: Next) => {
@@ -89,14 +92,22 @@ class App extends Component<IAppProps, IAppState> {
 		this.destroy$.next();
 	}
 
+	logOut() {
+		AuthService.logOut();
+		this.props.history.push('/');
+	}
+
     render() {
         return (
             <div className="app">
                 <GuardProvider guards={[this.appGuard]} loading={'Loading...'} error={'Not Found'}>
-                    {!this.state.isLogged && <Link to="/register">To Register<br/></Link>}
-                    {!this.state.isLogged && (<Link to="/login">To Login<br/></Link>)}
-                    {this.state.isLogged && <Link to="/profile">To Profile<br/></Link>}
-                    {<Link to="/">To Home<br/></Link>}
+					<div>
+						{!this.state.isLogged && <Link to="/register">To Register<br/></Link>}
+						{this.state.isLogged && <Link to="/profile">To Profile<br/></Link>}
+						{<Link to="/">To Home<br/></Link>}
+						{!this.state.isLogged ? (<Link to="/login">To Login</Link>) : (<Button onClick={this.logOut}>LogOut</Button>)}
+						<br/>
+					</div>
                     <Switch>
                         <GuardedRoute path="/profile">
                             <Profile />
@@ -117,6 +128,13 @@ class App extends Component<IAppProps, IAppState> {
     }
 }
 
-const mapDispatchToProps = actions[EProfileType.FETCH_PROFILE];
+const mapDispatchToProps = (dispatch: Dispatch<Action>) => { 
+	return {
+		fetchProfile: (history: History) => {
+			const value = dispatch({ type: EProfileType.FETCH_PROFILE, payload: { history } });
+			return value;
+		},
+	}
+};
 
 export default connect(null, mapDispatchToProps)(withRouter(App));

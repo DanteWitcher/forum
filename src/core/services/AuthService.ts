@@ -80,4 +80,9 @@ export default class AuthService {
         const reLoginTime = ((Number(tokenData.exp) * 1000) - Date.now() - CONFIG.RE_LOGIN_TIME);
         this.reLoginTimer = setTimeout(() => this.reLogin(tokenData.email), reLoginTime);
     }
+
+	static logOut(): void {
+		localStorage.removeItem(CONFIG.LS_USER_KEY);
+		this.isLogin$.next(false);
+	}
 }

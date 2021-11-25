@@ -1,11 +1,12 @@
+import { Action, Dispatch } from '@reduxjs/toolkit';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Link, Route, RouteComponentProps, Switch, withRouter } from 'react-router-dom';
 import { GuardedRoute, GuardProvider, Next } from 'react-router-guards';
-import { defer, of, Subject, switchMap, takeUntil } from 'rxjs';
+import { defer, of, Subject, takeUntil } from 'rxjs';
+import { EProfileType } from '../../core/redux/types/profile.enum';
 
 import FilesService from '../../core/services/FilesService';
-import ProfileService from '../../core/services/ProfileService';
 import { IProfile } from '../../shared/interfaces/profile.interface';
 import { IState } from '../../shared/interfaces/state.interface';
 import ProfileAdd from '../ProfileAdd/ProfileAdd';
@@ -42,24 +43,25 @@ class Profile extends Component<IProfileProps, IProfileState> {
 
 	editProfile = (file, profileForm) => {
 		return defer(() => Boolean(file) ? FilesService.uploadFile(file) : of(this.props.profile.photoUrl)).pipe(
-			switchMap((resp: any) => {
-				return ProfileService.editProfile({ ...profileForm, photoUrl: resp?.data?.data || resp });
-			}),
 			takeUntil(this.destroy$),
-		).subscribe(() => {
-			console.log('Edit....');
-			this.props.history.push('/');
-		});
+		).subscribe(
+			(resp: any) => {
+			    return this.props.editProfile(
+			        this.props.history, { ...profileForm, photoUrl: resp?.data?.data || resp },
+			    );
+			},
+		);
 	}
 
 	createProfile = (file, profileForm) => {
 		return FilesService.uploadFile(file).pipe(
-			switchMap((resp: any) => ProfileService.createProfile({ ...profileForm, photoUrl: resp.data.data })),
 			takeUntil(this.destroy$),
-		).subscribe(() => {
-			console.log('Create....');
-			this.props.history.push('/');
-		});
+		).subscribe(
+			(resp: any) => this.props.createProfile(
+				this.props.history,
+				{ ...profileForm, photoUrl: resp.data.data },
+			),
+		);
 	}
 
     render() {
@@ -92,4 +94,17 @@ const mapStateToProps = ({ profile }: IState) => {
 	}
 }
 
-export default connect(mapStateToProps)(withRouter(Profile));
+const mapDispatchToProps = (dispatch: Dispatch<Action>) => { 
+	return {
+		createProfile: (history: History, data: any) => {
+			const value = dispatch({ type: EProfileType.CREATE_PROFILE, payload: { history, data } });
+			return value;
+		},
+		editProfile: (history: History, data: any) => {
+			const value = dispatch({ type: EProfileType.EDIT_PROFILE, payload: { history, data } });
+			return value;
+		},
+	}
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(Profile));

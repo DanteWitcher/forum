@@ -10,6 +10,11 @@ export default class ProfileService {
 
     static createProfile(data: any): Observable<any> {
 		const path = `${this.uri}/create`;
+
+		// TODO: move to backend
+		if ('id' in data) {
+			delete data.id;
+		}
 		
 		return HttpsService.post(path, data);
     }
@@ -23,4 +28,10 @@ export default class ProfileService {
 	static deleteProfile(path: string, data: any): Observable<any> {
 		return HttpsService.delete(path, data);
     }
+
+	static checkNickName(nickName: string) {
+		const path = `${this.uri}/check-name`;
+
+		return HttpsService.post(path, { nickName });
+	}
 }
