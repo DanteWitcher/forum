@@ -8,6 +8,12 @@ export default class ProfileService {
         return HttpsService.get(this.uri).pipe(pluck('data'));
     }
 
+	static getProfiles(): Observable<any> {
+		const path = `${this.uri}/profiles`;
+
+        return HttpsService.get(path).pipe(pluck('data'));
+    }
+
     static createProfile(data: any): Observable<any> {
 		const path = `${this.uri}/create`;
 
@@ -32,6 +38,6 @@ export default class ProfileService {
 	static checkNickName(nickName: string) {
 		const path = `${this.uri}/check-name`;
 
-		return HttpsService.post(path, { nickName });
+		return HttpsService.post(path, { nickName: nickName.trim() });
 	}
 }

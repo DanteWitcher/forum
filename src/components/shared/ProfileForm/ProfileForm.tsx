@@ -2,11 +2,12 @@ import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import { Avatar, Button, LinearProgress, TextField } from '@mui/material';
 import React, { Component } from 'react';
+import { debounceTime, distinctUntilChanged, filter, Subject, switchMap, takeUntil } from 'rxjs';
 
-import './ProfileForm.scss';
 import { makeAsImg } from '../../../shared/helpers/make-as-img';
 import ProfileService from '../../../core/services/ProfileService';
-import { debounce, debounceTime, distinctUntilChanged, finalize, Observable, Subject, takeUntil, timer } from 'rxjs';
+
+import './ProfileForm.scss';
 
 interface IProfileFormProps {
     onSubmit: (form: IProfileFormState) => void;
@@ -29,20 +30,30 @@ export interface IProfileFormState {
 export default class Profile extends Component<IProfileFormProps, IProfileFormState> {
 	destroy$: Subject<void> = new Subject();
 	onSearch$ = new Subject();
-	onNickNameSubscription$: Observable<any>;
 
 	componentDidMount() {
-		this.onNickNameSubscription$ = this.onSearch$.asObservable().pipe(
-			debounceTime(1000),
+		let _setErrors;
+		let _setSubmitting;
+
+		this.onSearch$.asObservable().pipe(
+			debounceTime(500),
+			filter(Boolean),
 			distinctUntilChanged(),
-			finalize(() => setSubmitting(false)),
+			switchMap(({ value, setErrors, setSubmitting }: any) => {
+				_setErrors = setErrors;
+				_setSubmitting = setSubmitting;
+
+				return ProfileService.checkNickName(value);
+			}),
 			takeUntil(this.destroy$),
 		).subscribe({
 			next: () => {
-				console.log('done');
+				_setSubmitting(false);
+				console.log('ProfileService request checkNickName has done');
 			},
-			error: ({ setErrors }) => {
-				setErrors({ nickName: 'nickName has already existed' })
+			error: () => {
+				_setSubmitting(false);
+				_setErrors({ nickName: 'nickName has already existed' })
 			}
 		})
 	}
@@ -157,12 +168,7 @@ export default class Profile extends Component<IProfileFormProps, IProfileFormSt
 								setSubmitting,
 								setErrors,
 							});
-
-							ProfileService.checkNickName().pipe(
-								debounce(() => timer(2000)),
-							);
 						}
-
 
 						return (<Form>
                             <div className="profile-form__upload">

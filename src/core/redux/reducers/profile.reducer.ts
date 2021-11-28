@@ -26,6 +26,12 @@ export const profileReducer = (state = initialState, action) => {
 				...state,
 				myProfile: action.payload,
 			};
+		case EProfileType.PROFILES_FETCHED:
+			console.log('PROFILES_FETCHED');
+			return { 
+				...state,
+				profiles: action.payload,
+			};
 		default:
 			return state;
 	}

@@ -17,8 +17,11 @@ const fetchProfileEpic = (action$: Observable<Action>, state$: StateObservable<v
 				// if profile exist so you can't got to profile/create
 				history.push('/profile/add');
 			} else {
-				history.push('/');
-				//TODO: add state for profile
+				if (['/register', '/login'].includes(history.location.pathname)) {
+					history.push('/');
+				} else {
+					history.goForward();
+				}
 			}
 
 			return ({ type: EProfileType.PROFILE_FETCHED, payload: profile });
@@ -54,8 +57,23 @@ const editProfileEpic = (action$: Observable<Action>) => {
 	)
 }
 
+const getProfilesEpic = (action$: Observable<Action>) => {
+	return action$.pipe(
+		ofType(EProfileType.FETCH_PROFILES),
+		switchMap(() => {
+			return ProfileService.getProfiles();
+		}),
+		map((profiles) => {
+			console.log(profiles);
+
+			return ({ type: EProfileType.PROFILES_FETCHED, payload: profiles?.data });
+		}),
+	)
+}
+
 export const epics = [
 	fetchProfileEpic,
 	createProfileEpic,
 	editProfileEpic,
+	getProfilesEpic,
 ];

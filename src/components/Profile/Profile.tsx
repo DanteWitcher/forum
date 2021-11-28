@@ -15,8 +15,7 @@ import ProfileView from '../ProfileView/ProfileView';
 
 import './Profile.scss';
 
-
-export interface IProfileProps extends RouteComponentProps {
+interface IProfileProps extends RouteComponentProps {
 	profile: IProfile,
 	createProfile: Function,
 	editProfile: Function,
@@ -69,7 +68,7 @@ class Profile extends Component<IProfileProps, IProfileState> {
 			<div className="profile">
             	<h1>Profile</h1>
 				<GuardProvider guards={[this.profileGuard]}>
-                    {this.props.profile ? <Link to="/profile/edit">To Edit</Link> : <Link to="/profile/create">To Add</Link>}
+                    {!this.props.profile && <Link to="/profile/create">To Add</Link>}
 					<br/>
 					<Switch>
 						<GuardedRoute path="/profile/edit">

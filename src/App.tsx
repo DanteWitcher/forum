@@ -10,24 +10,32 @@ import {
 	tap,
  } from 'rxjs';
 import { connect } from 'react-redux';
-import { Button } from '@mui/material';
+import { Action, Dispatch } from '@reduxjs/toolkit';
+import { Button, Drawer } from '@mui/material';
+import ContactsIcon from '@mui/icons-material/Contacts';
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 
 import Login from './components/Login/Login.lazy';
 import Register from './components/Register/Register.lazy';
 import Home from './components/Home/Home.lazy';
 import Profile from './components/Profile/Profile.lazy';
+import Profiles from './components/Profiles/Profiles.lazy';
 
 import AuthService from './core/services/AuthService';
 import { EProfileType } from './core/redux/types/profile.enum';
 
+import { IProfile } from './shared/interfaces/profile.interface';
+import { IState } from './shared/interfaces/state.interface';
+
 import './App.scss';
-import { Action, Dispatch } from '@reduxjs/toolkit';
 
 interface IAppState {
 	isLogged: boolean,
+	isContactsOpen: boolean,
 }
 
 interface IAppProps extends RouteComponentProps {
+	profile: IProfile,
 	fetchProfile: Function, 
 }
 
@@ -39,9 +47,11 @@ class App extends Component<IAppProps, IAppState> {
 
 		this.state = {
 			isLogged: null,
+			isContactsOpen: false,
 		};
 
 		this.logOut = this.logOut.bind(this);
+		this.toggleDrawer = this.toggleDrawer.bind(this);
 	}
 
 	appGuard = (to, from, next: Next) => {
@@ -97,6 +107,12 @@ class App extends Component<IAppProps, IAppState> {
 		this.props.history.push('/');
 	}
 
+	toggleDrawer() {
+	    this.setState({
+			isContactsOpen: !this.state.isContactsOpen,
+		});
+	}
+
     render() {
         return (
             <div className="app">
@@ -107,6 +123,9 @@ class App extends Component<IAppProps, IAppState> {
 						{<Link to="/">To Home<br/></Link>}
 						{!this.state.isLogged ? (<Link to="/login">To Login</Link>) : (<Button onClick={this.logOut}>LogOut</Button>)}
 						<br/>
+					</div>
+					<div>
+						{(this.state.isLogged && this.props.profile) && <Button onClick={this.toggleDrawer}><ContactsIcon color="primary"/></Button>}
 					</div>
                     <Switch>
                         <GuardedRoute path="/profile">
@@ -123,18 +142,31 @@ class App extends Component<IAppProps, IAppState> {
                         </Route>
                     </Switch>
                 </GuardProvider>
+				<Drawer
+					anchor='left'
+					open={this.state.isContactsOpen}
+				>
+					<Button onClick={this.toggleDrawer}><ArrowBackIosNewIcon color="primary"/></Button>
+					<Profiles></Profiles>
+				</Drawer>
             </div>
         );
     }
 }
 
+const mapStateToProps = ({ profile }: IState) => {
+	return {
+		profile: profile.myProfile,
+	}
+}
+
 const mapDispatchToProps = (dispatch: Dispatch<Action>) => { 
 	return {
-		fetchProfile: (history: History) => {
+		fetchProfile: (history) => {
 			const value = dispatch({ type: EProfileType.FETCH_PROFILE, payload: { history } });
 			return value;
 		},
 	}
 };
 
-export default connect(null, mapDispatchToProps)(withRouter(App));
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(App));
