@@ -34,7 +34,7 @@ class Profiles extends Component<IProfilesProps, IProfilesState> {
 			);
 		}
 
-		const profiles = this.props.profiles.filter((p) => p.id === this.props.profile.id);
+		const profiles = this.props.profiles.filter((p) => p.id !== this.props.profile.id);
 		const liItems = profiles.map((p) => {
 			const li = 
 			(<li className="profiles__nick-name" key={p.id}>

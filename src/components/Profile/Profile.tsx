@@ -53,12 +53,12 @@ class Profile extends Component<IProfileProps, IProfileState> {
 	}
 
 	createProfile = (file, profileForm) => {
-		return FilesService.uploadFile(file).pipe(
+		return defer(() => Boolean(file) ? FilesService.uploadFile(file) : of('')).pipe(
 			takeUntil(this.destroy$),
 		).subscribe(
 			(resp: any) => this.props.createProfile(
 				this.props.history,
-				{ ...profileForm, photoUrl: resp.data.data },
+				{ ...profileForm, photoUrl: resp?.data?.data || resp },
 			),
 		);
 	}
